@@ -55,7 +55,7 @@ def generate_payload(file_name: str, dataflow_data: dict, keys_list:list[str], v
   if len(os.path.basename(file_name).split(sep="_")) > 2:
     
     #Se evalua si la llave está entre las llaves de dataflow asociado y si la cantidad de información adicional es igual a la cantidad de valores en la llave
-    if "aditional_values" in dataflow_data.keys() and type(dataflow_data["aditional_values"]) == "<class 'list'>":
+    if "aditional_values" in dataflow_data.keys() and str(type(dataflow_data["aditional_values"])) == "<class 'list'>":
 
       #Se define el payload como un diccionario usando una serie de listas. Para esto, se utilizan las variables que se reciben por parámentro
       payload = dict(zip(keys_list + dataflow_data["aditional_values"], values_list + os.path.basename(file_name).split(sep="_")[1:-1]))
