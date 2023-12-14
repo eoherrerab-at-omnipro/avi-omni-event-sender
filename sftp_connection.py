@@ -15,17 +15,14 @@ dotenv.load_dotenv(dotenv_path = "config/sftp.env")
 #Se define la función que obtiene los archivos desde el SFTP, en base a las condiciones impuestas en el nombre
 def list_files() -> list[dict]:
 
-    #Se define un cliente SSH para establecer una conexión al SFTP
-    ssh = paramiko.SSHClient()
+    #Se define un cliente para establecer una conexión al SFTP. Para esto, se accede al archivo .env cargado anteriormente y se obtiene la variable "HOSTNAME" y "PORT"
+    transport = paramiko.Transport((os.getenv("HOSTNAME"), 22))
 
-    #Se define de manera automática las políticas de conexión al SFTP
-    ssh.set_missing_host_key_policy(policy = paramiko.AutoAddPolicy())
-
-    #Se establece una conexión al SFTP. Para esto, se accede al archivo .env cargado anteriormente y se obtiene la variable "HOSTNAME", "PORT", "USER", "PASSWORD"
-    ssh.connect(hostname = os.getenv("HOSTNAME"), port = os.getenv("PORT"), username = os.getenv("USER"), password = os.getenv("PASSWORD"))
+    #Se establece una conexión al SFTP. Para esto, se accede al archivo .env cargado anteriormente y se obtiene la variable "USER" y "PASSWORD"
+    transport.connect(username = os.getenv("USER"), password = os.getenv("PASSWORD"))
 
     #Se abre el SFTP usando el cliente definido anteriormente
-    sftp =  ssh.open_sftp()
+    sftp =  transport.open_sftp_client()
 
     #Se define la lista de rutas de carpetas que se deben evaluar, usando como separador el operador "|". Para esto, se accede al archivo .env cargado anteriormente y se obtiene la variable "FOLDER_PATHS"
     folder_paths = os.getenv("FOLDER_PATHS").split(sep="|")
@@ -68,7 +65,7 @@ def list_files() -> list[dict]:
     sftp.close()
 
     #Se cierra el cliente SSH usando el cliente definido anteriormente
-    ssh.close()
+    transport.close()
 
     #Se retorna la lista de archivos a la función original
     return files
@@ -77,17 +74,14 @@ def list_files() -> list[dict]:
 #Se define la función que obtiene el archivo maestro en formato JSON desde el SFTP, en base a las condiciones impuestas en el nombre
 def get_master_json_file() -> str:
 
-    #Se define un cliente SSH para establecer una conexión al SFTP
-    ssh = paramiko.SSHClient()
+    #Se define un cliente para establecer una conexión al SFTP. Para esto, se accede al archivo .env cargado anteriormente y se obtiene la variable "HOSTNAME" y "PORT"
+    transport = paramiko.Transport((os.getenv("HOSTNAME"), 22))
 
-    #Se define de manera automática las políticas de conexión al SFTP
-    ssh.set_missing_host_key_policy(policy = paramiko.AutoAddPolicy())
-
-    #Se establece una conexión al SFTP. Para esto, se accede al archivo .env cargado anteriormente y se obtiene la variable "HOSTNAME", "PORT", "USER", "PASSWORD"
-    ssh.connect(hostname = os.getenv("HOSTNAME"), port = os.getenv("PORT"), username = os.getenv("USER"), password = os.getenv("PASSWORD"))
+    #Se establece una conexión al SFTP. Para esto, se accede al archivo .env cargado anteriormente y se obtiene la variable "USER" y "PASSWORD"
+    transport.connect(username = os.getenv("USER"), password = os.getenv("PASSWORD"))
 
     #Se abre el SFTP usando el cliente definido anteriormente
-    sftp =  ssh.open_sftp()
+    sftp =  transport.open_sftp_client()
 
     #Se define el contenido del archivo maestro en formato JSON. Para esto, se accede al archivo .env cargado anteriormente y se obtiene la variable "MASTER_PATH"
     content = sftp.open(filename = os.getenv("MASTER_PATH"), mode = "r").read()
@@ -95,8 +89,8 @@ def get_master_json_file() -> str:
     #Se cierra el SFTP usando el cliente definido anteriormente
     sftp.close()
 
-    #Se cierra el cliente SSH usando el cliente definido anteriormente
-    ssh.close()
+    #Se cierra el cliente usando el cliente definido anteriormente
+    transport.close()
 
     #Se retorna el contenido del archivo maestro en formato JSON a la función original
     return str(content, encoding='utf-8')
