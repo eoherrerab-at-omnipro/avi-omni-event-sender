@@ -17,7 +17,7 @@ def list_files() -> list[dict]:
 
     connection_options.hostkeys = None
 
-    sftp = pysftp.Connection(os.getenv("HOSTNAME"), username=os.getenv("USER"), password=os.getenv("PASSWORD"), cnopts=connection_options)
+    sftp = pysftp.Connection(os.getenv("HOST_NAME"), username=os.getenv("USER_NAME"), password=os.getenv("PASSWORD"), cnopts=connection_options)
 
     folder_paths = os.getenv("FOLDER_PATHS").split(sep="|")
 
@@ -53,7 +53,7 @@ def get_master_json_file() -> str:
 
     connection_options.hostkeys = None
 
-    sftp = pysftp.Connection(os.getenv("HOSTNAME"), username=os.getenv("USER"), password=os.getenv("PASSWORD"), cnopts=connection_options)
+    sftp = pysftp.Connection(os.getenv("HOST_NAME"), username=os.getenv("USER_NAME"), password=os.getenv("PASSWORD"), cnopts=connection_options)
 
     content = sftp.open(remote_file = os.getenv("MASTER_PATH"), mode = "r").read().decode(encoding="utf-8")
 
