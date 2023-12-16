@@ -67,7 +67,7 @@ def send_payload_to_endpoint(access_token: str, adobe_flow_id: str, data: dict) 
     }
 
     #Se define el cuerpo de la petición. Para eso, se utiliza la variable anteriormente declarada
-    body = json.dumps(data, indent=2)
+    body = json.dumps(data)
 
     #Se define la respuesta de la petición como el envío de la petición misma, mediante un método POST, utilizando
     #como URL un enlace estático, la cabecera y cuerpo de la petición previamente definidos

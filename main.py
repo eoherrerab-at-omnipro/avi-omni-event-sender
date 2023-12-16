@@ -20,13 +20,13 @@ if __name__ == "__main__":
 
     #Se realiza una iteración sobre todos los elementos que existan en la lista
     for file in files:
-
+        
         #Se define la data del dataflow en especifico asociado al archivo como el producto de la función que permite obtener la información del dataflow a partir del archivo maestro
         dataflow_data = data_handling.get_dataflow_data(dataflows_data = dataflows_data, file_name = file["file_name"])
 
         #Se evalua si se encuentra el dataflow correspondiente
         if dataflow_data:
-
+            
             #Se define un nuevo proceso, usando la función para crear un nuevo flujo de datos internamente
             process =  multiprocessing.Process(target = dataflows.create_dataflow, args = [dataflow_data, file])
 
