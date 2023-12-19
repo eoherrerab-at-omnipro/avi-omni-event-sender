@@ -30,10 +30,10 @@ def create_dataflow(dataflow_data: dict, file: dict) -> None:
     #Se realiza una iteración usando un indice desde cero hasta la cantidad de líneas del dataframe
     for i in range (len(dataframe_rows)):
         
-        #Se evalua si el indice anterior es existente
+        #Se evalua si el indice anterior existe
         if i > 0:
             
-            #Se evalua si el campo que contiene la identidad en la iteración actual es el mismo en la iteración siguiente
+            #Se evalua si el campo que contiene la identidad en la iteración actual es el mismo en la iteración anterior
             if dataframe_rows[i - 1][1] == dataframe_rows[i][1]:
                 
                 #Se ejecuta una pausa en el sistema de la cantidad de segundos definida. Para esto, se accede al archivo .env cargado anteriormente y se obtiene la variable "JOURNEYS_REENTRANCE_WAIT_PERIOD"
