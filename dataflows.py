@@ -30,7 +30,7 @@ def create_dataflow(dataflow_data: dict, file: dict) -> None:
     #Se realiza una iteración usando un indice desde cero hasta la cantidad de líneas del dataframe
     for i in range (len(dataframe_rows)):
         
-        #Se evalua si el indice anterior existe
+        #Se evalua si el indice anterior es existente
         if i > 0:
             
             #Se evalua si el campo que contiene la identidad en la iteración actual es el mismo en la iteración siguiente
