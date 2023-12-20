@@ -1,16 +1,11 @@
-#Se importa el módulo que permite cargar la información del archivo .env. Para esto, se debe usar pip install python-dotenv
-import dotenv
 #Se importa el módulo que permite manejar la información de los dataframe
 import data_handling
-#Se importa el módulo que permite acceder a la información de los archivos .env
-import os
-#Se importa el módulo que permite manejar la información de los dataframe
+#Se importa el módulo que permite manipular la API de Adobe Experience Platform
 import adobe_requests
-#Se importa el módulo que permite realizar pausas en la ejecución del sistema
-import time
-
-#Se carga el archivo .env disponible en la carpeta config
-dotenv.load_dotenv(dotenv_path="config/aep.env")
+#Se importa el módulo que permite crear procesos al mismo tiempo
+import multiprocessing
+#Se importa el módulo que permite manejar la información por perfiles
+import event_series
 
 #Se define la función que manipula y envía la información a Experience Platform
 def create_dataflow(dataflow_data: dict, file: dict) -> None:
@@ -22,26 +17,34 @@ def create_dataflow(dataflow_data: dict, file: dict) -> None:
     dataframe_headers = list(dataframe.columns.values)
 
     #Se definen las líneas del archivo como la iteración del dataframe línea por línea
-    dataframe_rows = [list(row) for row in dataframe.itertuples(index=True)]
+    dataframe_rows = [list(row) for row in dataframe.itertuples(index=False)]
 
     #Se define el token de acceso como el producto de la función para la generación del token de acceso
     access_token = adobe_requests.generate_access_token()
 
-    #Se realiza una iteración usando un indice desde cero hasta la cantidad de líneas del dataframe
-    for i in range (len(dataframe_rows)):
-        
-        #Se evalua si el indice anterior existe
-        if i > 0:
-            
-            #Se evalua si el campo que contiene la identidad en la iteración actual es el mismo en la iteración anterior
-            if dataframe_rows[i - 1][1] == dataframe_rows[i][1]:
-                
-                #Se ejecuta una pausa en el sistema de la cantidad de segundos definida. Para esto, se accede al archivo .env cargado anteriormente y se obtiene la variable "JOURNEYS_REENTRANCE_WAIT_PERIOD"
-                time.sleep(float(os.getenv("JOURNEYS_REENTRANCE_WAIT_PERIOD")))
+    #Se define el diccionario que contiene la información por perfil único
+    payloads = {}
+
+    #Se realia una iteración sobre todos los elementos que existan en la lista de filas del dataframe
+    for dataframe_row in dataframe_rows:
 
         #Se define el payload como el producto de la función para la generación del payload
-        payload = data_handling.generate_payload(file_name = file["file_name"], dataflow_data = dataflow_data, keys_list = dataframe_headers, values_list = dataframe_rows[i][1:])
+        payload = data_handling.generate_payload(file_name = file["file_name"], dataflow_data = dataflow_data, keys_list = dataframe_headers, values_list = dataframe_row)
 
-        #Se envia el payload usando la función para el envío de información al endpoint
-        adobe_requests.send_payload_to_endpoint(access_token = access_token["access_token"], adobe_flow_id = dataflow_data["flow_id"], data = payload)
-        
+        #Se evalua si la identidad está en el diccionario de payloads
+        if payload[dataflow_data["identity_column"]] not in payloads:
+            
+            ##Se define una lista que contendrá la información de los payloads
+            payloads[payload[dataflow_data["identity_column"]]] = []
+
+        #Se agrega un elemento a la lista
+        payloads[payload[dataflow_data["identity_column"]]].append(payload)
+
+    #Se realia una iteración sobre todos los elementos que existan en la lista de llaves del diccionario de payloads
+    for key in payloads.keys():
+
+        #Se define un nuevo proceso, usando la función para crear un nuevo flujo de datos internamente
+        process =  multiprocessing.Process(target = event_series.send_event_series_to_endpoint, args = [access_token, dataflow_data["flow_id"], payloads[key]])
+
+        #Se inicia el proceso definido anteriormente    
+        process.start()

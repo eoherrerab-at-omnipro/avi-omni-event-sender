@@ -48,7 +48,7 @@ def generate_access_token() -> dict:
 
 
 #Se define la función que genera el trabajo de evaluación de segmentos, la cual recibe por parámetro el token de acceso en formato string (str)
-def send_payload_to_endpoint(access_token: str, adobe_flow_id: str, data: dict) -> None:
+def send_event_to_endpoint(access_token: str, adobe_flow_id: str, data: dict) -> None:
     
     #Se define la cabecera de la petición
     header = {
