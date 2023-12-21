@@ -48,7 +48,7 @@ def generate_access_token() -> dict:
 
 
 #Se define la función que genera el trabajo de evaluación de segmentos, la cual recibe por parámetro el token de acceso en formato string (str)
-def send_event_to_endpoint(access_token: str, adobe_flow_id: str, data: dict) -> None:
+def send_payload_to_endpoint(access_token: str, adobe_flow_id: str, data: dict) -> None:
     
     #Se define la cabecera de la petición
     header = {
@@ -68,6 +68,8 @@ def send_event_to_endpoint(access_token: str, adobe_flow_id: str, data: dict) ->
 
     #Se define el cuerpo de la petición. Para eso, se utiliza la variable anteriormente declarada
     body = json.dumps(data)
+
+    print(json.dumps(data, indent=2))
 
     #Se define la respuesta de la petición como el envío de la petición misma, mediante un método POST, utilizando
     #como URL un enlace estático, la cabecera y cuerpo de la petición previamente definidos
