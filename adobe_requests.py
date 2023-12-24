@@ -6,6 +6,10 @@ import dotenv
 import requests
 #Se importa el módulo que permite manipular archivos JSON
 import json
+##Se importa el módulo que permite enviar peticiones HTTP asincronas. Para esto, se debe usar pip install httpx
+import httpx
+
+import datetime
 
 #Se carga el archivo .env disponible en la carpeta config
 dotenv.load_dotenv(dotenv_path="config/aep.env")
@@ -71,6 +75,14 @@ def send_payload_to_endpoint(access_token: str, adobe_flow_id: str, data: dict) 
 
     print(json.dumps(data, indent=2))
 
+    antes = datetime.datetime.now()
+
     #Se define la respuesta de la petición como el envío de la petición misma, mediante un método POST, utilizando
     #como URL un enlace estático, la cabecera y cuerpo de la petición previamente definidos
-    res = requests.request(method = "POST", url = os.getenv("ENDPOINT"), headers = header, data = body)
+    httpx.post(url = os.getenv("ENDPOINT"), headers = header, data = body)
+
+    despues = datetime.datetime.now()
+
+    diferencia = despues - antes
+    
+    print(diferencia)

@@ -15,8 +15,6 @@ dotenv.load_dotenv(dotenv_path="config/aep.env")
 #Se define la función que manipula y envía la información a Experience Platform
 def create_dataflow(dataflow_data: dict, file: dict) -> None:
 
-    print(file)
-
     #Se define el dataframe como el producto de la función para la lectura del contenido del archivo
     dataframe = data_handling.read_file_content(file_content = file["file_content"], file_delimiter = dataflow_data["separator"], identity_column = dataflow_data["identity_column"])
 

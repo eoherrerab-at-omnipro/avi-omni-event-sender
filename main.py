@@ -27,14 +27,17 @@ if __name__ == "__main__":
         #Se define la información del flujo de datos como el producto de la función para obtener dicha información a partir del archivo maestro
         dataflow_data = data_handling.get_dataflow_data(dataflows_data = dataflows_data, file_name = file["file_name"])
 
-        #Se agrega un elemento a la lista
-        data_for_pool.append([dataflow_data, file])
+        #Se evalua si existe información asociada a este flujo de datos
+        if dataflow_data:
+
+            #Se agrega un elemento a la lista
+            data_for_pool.append([dataflow_data, file])
 
     #Se evalua si la lista
-    if len(files) > 0:
+    if len(data_for_pool) > 0:
         
         #Se define una piscina de procesos con la catidad de procesos como la cantidad de archivos leídos
-        with multiprocessing.Pool(processes=len(files)) as pool:
+        with multiprocessing.Pool(processes=len(data_for_pool)) as pool:
             
             #Se define una respuesta de los procesos
             res = pool.starmap(dataflows.create_dataflow, data_for_pool)
