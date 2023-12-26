@@ -2,13 +2,11 @@
 import os
 #Se importa el módulo que permite cargar la información del archivo .env. Para esto, se debe usar pip install python-dotenv
 import dotenv
-#Se importa el módulo que permite enviar peticiones HTTP. Para esto, se debe usar pip install requests
-import requests
 #Se importa el módulo que permite manipular archivos JSON
 import json
-##Se importa el módulo que permite enviar peticiones HTTP asincronas. Para esto, se debe usar pip install httpx
+#Se importa el módulo que permite enviar peticiones HTTP asincronas. Para esto, se debe usar pip install httpx
 import httpx
-
+#Se importa el módulo que permite crear las marcas de tiempo con respecto al tiempo actual
 import datetime
 
 #Se carga el archivo .env disponible en la carpeta config
@@ -42,7 +40,7 @@ def generate_access_token() -> dict:
 
     #Se define la respuesta de la petición como el envío de la petición misma, mediante un método POST, utilizando
     #como URL el IMS cargado desde el archivo .env y la cabecera y cuerpo de la petición previamente definidos
-    res = requests.request(method="POST", url=os.getenv("AUTH_ENDPOINT"), params=params ,headers=header, data=body)
+    res = httpx.post(url=os.getenv("AUTH_ENDPOINT"), params=params, headers=header, data=body)
 
     #Se define el token de acceso como el valor obtenido del resultado de la petición, específicamente el campo "access_token"
     access_token = json.loads(res.text)
@@ -73,16 +71,21 @@ def send_payload_to_endpoint(access_token: str, adobe_flow_id: str, data: dict) 
     #Se define el cuerpo de la petición. Para eso, se utiliza la variable anteriormente declarada
     body = json.dumps(data)
 
+    #Se muestra el cuerpo de la petición. SOLO CON FINES DE DEBUG
     print(json.dumps(data, indent=2))
 
-    antes = datetime.datetime.now()
+    #Se define una marca de tiempo antes del envío de la petición como una marca de tiempo usando el tiempo actual. SOLO CON FINES DE DEBUG
+    before = datetime.datetime.now()
 
-    #Se define la respuesta de la petición como el envío de la petición misma, mediante un método POST, utilizando
-    #como URL un enlace estático, la cabecera y cuerpo de la petición previamente definidos
+    #Se realiza el envío de la petición, mediante un método POST, utilizando como URL
+    #un enlace estático, la cabecera y cuerpo de la petición previamente definidos
     httpx.post(url = os.getenv("ENDPOINT"), headers = header, data = body)
 
-    despues = datetime.datetime.now()
+    #Se define una marca de tiempo antes del envío de la petición como una marca de tiempo usando el tiempo actual. SOLO CON FINES DE DEBUG
+    after = datetime.datetime.now()
 
-    diferencia = despues - antes
+    #Se define el tiempo de envio de la solicitud como la diferencia entre las marcas de tiempo. SOLO CON FINES DE DEBUG
+    send_request_time = after - before
     
-    print(diferencia)
+    #Se muestra el tiempo de envio de la solicitud. SOLO CON FINES DE DEBUG
+    print(send_request_time)

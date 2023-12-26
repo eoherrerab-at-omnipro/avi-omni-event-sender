@@ -6,6 +6,8 @@ import sftp_connection
 import data_handling
 #Se importa el módulo que permite crear procesos al mismo tiempo
 import multiprocessing
+#Se importa el módulo que permite enviar generar el token de acceso
+import adobe_requests
 #Se importa el módulo que permite crear flujos de datos para el envío de información 
 import dataflows
 
@@ -21,6 +23,9 @@ if __name__ == "__main__":
     #Se define una lista de datos por flujo de datos
     data_for_pool = []
 
+    #Se define el token de acceso como el producto de la función para la generación del token de acceso
+    access_token = adobe_requests.generate_access_token()
+
     #Se realiza una iteración sobre todos los elementos de la lista
     for file in files:
         
@@ -31,11 +36,11 @@ if __name__ == "__main__":
         if dataflow_data:
 
             #Se agrega un elemento a la lista
-            data_for_pool.append([dataflow_data, file])
+            data_for_pool.append([dataflow_data, file, access_token["access_token"]])
 
     #Se evalua si la lista
     if len(data_for_pool) > 0:
-        
+
         #Se define una piscina de procesos con la catidad de procesos como la cantidad de archivos leídos
         with multiprocessing.Pool(processes=len(data_for_pool)) as pool:
             
