@@ -79,7 +79,7 @@ def send_payload_to_endpoint(access_token: str, adobe_flow_id: str, data: dict) 
 
     #Se realiza el envío de la petición, mediante un método POST, utilizando como URL
     #un enlace estático, la cabecera y cuerpo de la petición previamente definidos
-    #httpx.post(url = os.getenv("ENDPOINT"), headers = header, data = body)
+    httpx.post(url = os.getenv("ENDPOINT"), headers = header, data = body)
 
     #Se define una marca de tiempo antes del envío de la petición como una marca de tiempo usando el tiempo actual. SOLO CON FINES DE DEBUG
     after = datetime.datetime.now()
