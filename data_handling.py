@@ -7,6 +7,8 @@ import io
 #Se importa el módulo que permite acceder a la información de los archivos .env
 import os
 
+import datetime
+
 #Se carga el archivo .env disponible en la carpeta config
 dotenv.load_dotenv(dotenv_path="config/log.env")
 
@@ -99,3 +101,34 @@ def write_row_in_log(row: list[str]) -> None:
 
   #Se guarda el dataframe en un archivo CSV. Para esto, se accede al archivo .env cargado anteriormente y se obtiene la variable "LOG_FILEPATH"
   dataframe.to_csv(os.getenv("LOG_FILEPATH"), index=False)
+
+
+def is_profile_in_sent_profiles(sent_profiles: pd.DataFrame, profile: str):
+
+  profiles = [list(row)[1] for row in sent_profiles.itertuples(index=False)]
+
+  return profile in profiles
+
+
+def update_sent_profile(sent_profiles: list[list], profile: str):
+
+  return None
+
+    
+
+
+def send_to_list_end(lista: list, profile: str):
+  
+  lista_aux =  lista
+
+  if profile == lista_aux[len(lista_aux)-1][0][0]:
+    return lista_aux
+
+  while profile == lista_aux[0][0][0]:
+    
+    lista_aux.append([lista_aux[0][0], datetime.datetime.now()])
+    
+    del lista_aux[0]
+  
+  return lista_aux
+
