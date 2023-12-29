@@ -29,7 +29,7 @@ def get_dataflow_data(dataflows_data: dict, file_name: str) -> dict | None:
 def read_file_content(file_content: str, file_delimiter: str, identity_column: str) -> pd.DataFrame:
   
   #Se define el dataframe como la lectura del contenido del archivo, controlando su entrada como un archivo, y usando el delimitador asociado
-  dataframe = pd.read_csv(io.StringIO(file_content), delimiter = file_delimiter)
+  dataframe = pd.read_csv(io.StringIO(file_content), delimiter = file_delimiter, dtype=str)
 
   #Se define el dataframe como el dataframe definido anteriormente, pero reemplazando los valores vacíos por null
   dataframe = dataframe.replace(pd.NA, None)
