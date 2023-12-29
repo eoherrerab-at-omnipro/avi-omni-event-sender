@@ -55,7 +55,7 @@ def list_files() -> list[dict]:
                         #Se define la ultima vez que se modificó el archivo
                         "last_modify_file": str(sftp.stat(remotepath = folder_path + file_path).st_mtime),
                         #Se define el contenido del archivo
-                        "file_content": sftp.open(remote_file = folder_path + file_path, mode = "r").read().decode(encoding="utf-8")
+                        "file_content": sftp.open(remote_file = folder_path + file_path, mode = "r").read().decode(encoding="iso-8859-1")
                     })
 
                     #Se agrega este registro al historial de archivos manipulados

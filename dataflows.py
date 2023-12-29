@@ -30,7 +30,7 @@ def create_dataflow(dataflow_data: dict, file: dict, access_token: str) -> None:
     #
     profile_sent = pd.DataFrame(columns=["LAST_SEND_TIMESTAMP", "PROFILE"])
 
-    list_end = False
+    list_end = True
 
     lista = []
 
