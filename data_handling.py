@@ -103,25 +103,13 @@ def write_row_in_log(row: list[str]) -> None:
   dataframe.to_csv(os.getenv("LOG_FILEPATH"), index=False)
 
 
-def is_profile_in_sent_profiles(sent_profiles: pd.DataFrame, profile: str):
-
-  profiles = [list(row)[1] for row in sent_profiles.itertuples(index=False)]
-
-  return profile in profiles
-
-
-def update_sent_profile(sent_profiles: list[list], profile: str):
-
-  return None
-
-    
-
-
 def send_to_list_end(lista: list, profile: str):
   
   lista_aux =  lista
 
   if profile == lista_aux[len(lista_aux)-1][0][0]:
+    for i in range(len(lista_aux)):
+      lista_aux[i][1]=datetime.datetime.now()
     return lista_aux
 
   while profile == lista_aux[0][0][0]:
