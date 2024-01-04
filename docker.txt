@@ -1,0 +1,5 @@
+Construir imagen de Docker
+docker build -t avi-sender-new-version:v1 .
+
+Exportar imagen de docker
+docker save -o avi-sender-new-version.tar avi-sender-new-version:v1

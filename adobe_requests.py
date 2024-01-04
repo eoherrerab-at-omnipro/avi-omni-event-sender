@@ -6,8 +6,6 @@ import dotenv
 import json
 #Se importa el módulo que permite enviar peticiones HTTP asincronas. Para esto, se debe usar pip install httpx
 import httpx
-#Se importa el módulo que permite crear las marcas de tiempo con respecto al tiempo actual
-import datetime
 
 #Se carga el archivo .env disponible en la carpeta config
 dotenv.load_dotenv(dotenv_path="config/aep.env")
@@ -49,8 +47,8 @@ def generate_access_token() -> dict:
     return access_token
 
 
-#Se define la función que genera el trabajo de evaluación de segmentos, la cual recibe por parámetro el token de acceso en formato string (str)
-def send_payload_to_endpoint(access_token: str, adobe_flow_id: str, data: dict) -> None:
+#Se define la función que realiza el envio del evento al endpoint de fuente correspondiente
+def send_event_to_endpoint(access_token: str, adobe_flow_id: str, data: dict) -> None:
     
     #Se define la cabecera de la petición
     header = {
@@ -72,20 +70,8 @@ def send_payload_to_endpoint(access_token: str, adobe_flow_id: str, data: dict) 
     body = json.dumps(data)
 
     #Se muestra el cuerpo de la petición. SOLO CON FINES DE DEBUG
-    #print(json.dumps(data, indent=2))
-
-    #Se define una marca de tiempo antes del envío de la petición como una marca de tiempo usando el tiempo actual. SOLO CON FINES DE DEBUG
-    before = datetime.datetime.now()
+    print(json.dumps(data, indent=2))
 
     #Se realiza el envío de la petición, mediante un método POST, utilizando como URL
     #un enlace estático, la cabecera y cuerpo de la petición previamente definidos
-    httpx.post(url = os.getenv("ENDPOINT"), headers = header, data = body)
-
-    #Se define una marca de tiempo antes del envío de la petición como una marca de tiempo usando el tiempo actual. SOLO CON FINES DE DEBUG
-    after = datetime.datetime.now()
-
-    #Se define el tiempo de envio de la solicitud como la diferencia entre las marcas de tiempo. SOLO CON FINES DE DEBUG
-    send_request_time = after - before
-    
-    #Se muestra el tiempo de envio de la solicitud. SOLO CON FINES DE DEBUG
-    print(send_request_time)
+    #httpx.post(url = os.getenv("ENDPOINT"), headers = header, data = body)

@@ -36,13 +36,27 @@ if __name__ == "__main__":
         if dataflow_data:
 
             #Se agrega un elemento a la lista
-            data_for_pool.append([dataflow_data, file, access_token["access_token"]])
+            data_for_pool.append((dataflow_data, file, access_token["access_token"]))
 
-    #Se evalua si la lista
-    if len(data_for_pool) > 0:
+    #Se evalua si la lista de archivos con información tiene menos de 10 elementos
+    if len(data_for_pool) < 10:
+
+        #Se define una piscina de procesos con la cantidad de procesos como la cantidad de archivos leídos
+        with multiprocessing.Pool(processes = len(data_for_pool)) as pool:
+            
+            #Se define una respuesta de los procesos como la ejecución de los flujos mismos
+            res = pool.starmap_async(dataflows.create_dataflow, data_for_pool)
+
+            #Se espera la ejecución de los flujos
+            res.wait()
+    
+    else:
 
         #Se define una piscina de procesos con la catidad de procesos como la cantidad de archivos leídos
-        with multiprocessing.Pool(processes=len(data_for_pool)) as pool:
+        with multiprocessing.Pool(processes = 10) as pool:
             
-            #Se define una respuesta de los procesos
-            res = pool.starmap(dataflows.create_dataflow, data_for_pool)
+            #Se define una respuesta de los procesos como la ejecución de los flujos mismos
+            res = pool.starmap_async(dataflows.create_dataflow, data_for_pool)
+
+            #Se espera la ejecución de los flujos
+            res.wait()

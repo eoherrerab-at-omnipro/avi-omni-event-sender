@@ -6,11 +6,11 @@ import pandas as pd
 import io
 #Se importa el módulo que permite acceder a la información de los archivos .env
 import os
-
+#Se importa el módulo que permite obtener la fecha actual
 import datetime
 
 #Se carga el archivo .env disponible en la carpeta config
-dotenv.load_dotenv(dotenv_path="config/log.env")
+dotenv.load_dotenv(dotenv_path="config/local.env")
 
 #Se define la función que obtiene la información del dataflow asociada al tipo de archivo
 def get_dataflow_data(dataflows_data: dict, file_name: str) -> dict | None:
@@ -41,17 +41,23 @@ def read_file_content(file_content: str, file_delimiter: str, identity_column: s
   dataframe = dataframe.reset_index(drop = True)
 
   #Se define el nuevo orden para el dataframe con la columna principal como la primera
-  new_order = [identity_column] + [column for column in dataframe.columns if column != identity_column]
+  columns = [identity_column] + [column for column in dataframe.columns if column != identity_column]
 
   #Se define el dataframe como el dataframe definido anteriormente, pero aplicando el nuevo orden definido anteriormente
-  dataframe = dataframe[new_order]
+  dataframe = dataframe[columns]
+
+  #Se define el nuevo conjunto de nombre de columnas del dataframe
+  #columns = {column: column.replace(' ', '_') for column in dataframe.columns}
+
+  #Se define el dataframe como el dataframe definido anteriormente, pero aplicando el nuevo conjunto de nombre de columnas
+  #dataframe = dataframe.rename(columns=columns, inplace=True)
 
   #Se retorna el dataframe a la función original
   return dataframe
 
 
 #Se define la función para generar el cuerpo de la petición a enviar via HTTP API
-def generate_payload(file_name: str, dataflow_data: dict, keys_list:list[str], values_list: list[str]) -> dict:
+def generate_event_payload(file_name: str, dataflow_data: dict, keys_list: list[str], values_list: list[str]) -> dict:
 
   #Se evalua si la longitud de la lista que contiene el nombre del archivo, realizando la separación, es mayor a dos
   if len(os.path.basename(file_name).split(sep="_")) > 2:
@@ -71,8 +77,7 @@ def generate_payload(file_name: str, dataflow_data: dict, keys_list:list[str], v
     payload = dict(zip(keys_list, values_list))
 
   #Se retorna el diccionario a la función original
-  return payload 
-
+  return payload
 
 #Se define la función que permite conocer si un registro está en el historial de archivos manipulados
 def is_row_in_log(row: list[str]) -> bool:
@@ -103,20 +108,35 @@ def write_row_in_log(row: list[str]) -> None:
   dataframe.to_csv(os.getenv("LOG_FILEPATH"), index=False)
 
 
-def send_to_list_end(lista: list, profile: str):
-  
-  lista_aux =  lista
+#Se define la función que permite verificar si un perfil se ha enviado y cuando se ha enviado
+def is_able_to_send(sent_profiles:dict, profile: str) -> bool:
 
-  if profile == lista_aux[len(lista_aux)-1][0][0]:
-    for i in range(len(lista_aux)):
-      lista_aux[i][1]=datetime.datetime.now()
-    return lista_aux
-
-  while profile == lista_aux[0][0][0]:
+  #Se evalua si el perfil existe en el historial de enviados
+  if profile in sent_profiles:
     
-    lista_aux.append([lista_aux[0][0], datetime.datetime.now()])
-    
-    del lista_aux[0]
-  
-  return lista_aux
+    #Se evalua si el tiempo actual menos el tiempo registrado es mayor a 30 segundos
+    if datetime.datetime.now().timestamp() - sent_profiles[profile] >= int(os.getenv("WAITING_TIME_PER_PROFILES")):
 
+      #Se retorna el valor verdadero
+      return True
+    
+    else:
+      #Se retorna el valor falso
+      return False
+
+  else:
+    #Se retorna el valor verdadero
+    return True
+
+
+#Se define la función que permite agregar y actualizar la información de envio al perfil
+def update_sent_profiles(sent_profiles: dict, profile: str):
+  
+  #Se inicializa el nuevo registro de envios a perfiles
+  updated_sent_profiles = sent_profiles
+  
+  #Se actualiza el nuevo registro del perfil con la fecha de ejecución de ahora
+  updated_sent_profiles[profile] = datetime.datetime.now().timestamp()
+
+  #Se retorna el nuevo registro de envios a perfiles
+  return updated_sent_profiles

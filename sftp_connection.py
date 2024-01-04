@@ -81,7 +81,7 @@ def get_master_json_file() -> str:
     sftp = pysftp.Connection(os.getenv("HOST_NAME"), username = os.getenv("USER_NAME"), password = os.getenv("PASSWORD"), cnopts = connection_options)
 
     #Se define el contenido del archivo maestro en formato JSON. Para esto, se accede al archivo .env cargado anteriormente y se obtiene la variable "MASTER_PATH"
-    content = sftp.open(remote_file = os.getenv("MASTER_PATH"), mode = "r").read().decode(encoding="utf-8")
+    content = sftp.open(remote_file = os.getenv("MASTER_PATH"), mode = "r").read().decode(encoding="iso-8859-1")
 
     #Se cierra la conexión al host usando el cliente definido anteriormente
     sftp.close()
