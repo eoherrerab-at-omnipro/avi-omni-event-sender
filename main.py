@@ -10,6 +10,8 @@ import multiprocessing
 import adobe_requests
 #Se importa el módulo que permite crear flujos de datos para el envío de información 
 import dataflows
+#Se importa el módulo que permite crear clientes HTTP. Para esto, se debe usar pip install httpx
+import httpx
 
 #Se evalua si se está iniciando la ejecutando desde la función principal
 if __name__ == "__main__":
@@ -23,8 +25,14 @@ if __name__ == "__main__":
     #Se define una lista de datos por flujo de datos
     data_for_pool = []
 
+    #Se define el cliente HTTP como el objeto de cliente sin tiempo de finalización
+    http_client = httpx.Client(timeout=None)
+
     #Se define el token de acceso como el producto de la función para la generación del token de acceso
-    access_token = adobe_requests.generate_access_token()
+    access_token = adobe_requests.generate_access_token(client = http_client)
+
+    #Se cierra el cliente HTTP usando el cliente definido anteriormente
+    http_client.close()
 
     #Se realiza una iteración sobre todos los elementos de la lista
     for file in files:

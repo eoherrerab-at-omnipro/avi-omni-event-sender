@@ -7,6 +7,9 @@ COPY . /app
 # Establece el directorio de trabajo en /app
 WORKDIR /app
 
+# Instala editores de texto usando apt-get
+RUN apt-get update && apt-get install -y nano vim emacs && rm -rf /var/lib/apt/lists/*
+
 # Instala las dependencias requeridas utilizando pip
 RUN pip install -r requirements/requirements.txt
 

@@ -8,6 +8,8 @@ import io
 import os
 #Se importa el módulo que permite obtener la fecha actual
 import datetime
+#Se importa el módulo que permite escribir un archivo CSV
+import csv
 
 #Se carga el archivo .env disponible en la carpeta config
 dotenv.load_dotenv(dotenv_path="config/local.env")
@@ -29,16 +31,16 @@ def get_dataflow_data(dataflows_data: dict, file_name: str) -> dict | None:
 def read_file_content(file_content: str, file_delimiter: str, identity_column: str) -> pd.DataFrame:
   
   #Se define el dataframe como la lectura del contenido del archivo, controlando su entrada como un archivo, y usando el delimitador asociado
-  dataframe = pd.read_csv(io.StringIO(file_content), delimiter = file_delimiter, dtype=str)
+  dataframe = pd.read_csv(io.StringIO(file_content), delimiter = file_delimiter, dtype=str, encoding="iso-8859-1")
 
   #Se define el dataframe como el dataframe definido anteriormente, pero reemplazando los valores vacíos por null
   dataframe = dataframe.replace(pd.NA, None)
 
   #Se define el dataframe como el dataframe definido anteriormente, pero organizandolo por criterio de la columna que contiene la identidad
-  dataframe = dataframe.sort_values(by = identity_column)
+  #dataframe = dataframe.sort_values(by = identity_column)
 
   #Se define el dataframe como el dataframe definido anteriormente, pero reasignando los indices de cada línea
-  dataframe = dataframe.reset_index(drop = True)
+  #dataframe = dataframe.reset_index(drop = True)
 
   #Se define el nuevo orden para el dataframe con la columna principal como la primera
   columns = [identity_column] + [column for column in dataframe.columns if column != identity_column]
@@ -79,6 +81,47 @@ def generate_event_payload(file_name: str, dataflow_data: dict, keys_list: list[
   #Se retorna el diccionario a la función original
   return payload
 
+
+def generate_api_triggered_payload(file_name: str, dataflow_data: dict, profile:str, keys_list: list[str], values_list: list[str]) -> dict:
+
+  #Se evalua si la longitud de la lista que contiene el nombre del archivo, realizando la separación, es mayor a dos
+  if len(os.path.basename(file_name).split(sep="_")) > 2:
+    
+    #Se evalua si la llave está entre las llaves de dataflow asociado y si la cantidad de información adicional es igual a la cantidad de valores en la llave
+    if "aditional_values" in dataflow_data.keys() and str(type(dataflow_data["aditional_values"])) == "<class 'list'>":
+
+      #Se define el context como un diccionario usando una serie de listas. Para esto, se utilizan las variables que se reciben por parámentro
+      context = dict(zip(keys_list + dataflow_data["aditional_values"], values_list + os.path.basename(file_name).split(sep="_")[1:-1]))
+
+    else:
+      #Se define el context como un diccionario usando una serie de listas. Para esto, se utilizan las variables que se reciben por parámentro
+      context = dict(zip(keys_list, values_list))
+  
+  else:
+    #Se define el context como un diccionario usando una serie de listas. Para esto, se utilizan las variables que se reciben por parámentro
+    context = dict(zip(keys_list, values_list))
+
+  #Se genera el payload a partir de la información
+  payload = {
+    "requestId": profile,
+    "campaignId": dataflow_data["campaign_id"],
+    "recipients": [
+      {
+        "type": "aep",
+        "userId": profile,
+        "namespace": "Email",
+        "channelData": {
+          "emailAddress": profile
+        },
+        "context": context  
+      }
+    ]
+  }
+
+  #Se retorna el diccionario a la función original
+  return payload
+
+
 #Se define la función que permite conocer si un registro está en el historial de archivos manipulados
 def is_row_in_log(row: list[str]) -> bool:
 
@@ -109,7 +152,7 @@ def write_row_in_log(row: list[str]) -> None:
 
 
 #Se define la función que permite verificar si un perfil se ha enviado y cuando se ha enviado
-def is_able_to_send(sent_profiles:dict, profile: str) -> bool:
+def is_able_to_send(sent_profiles: dict, profile: str) -> bool:
 
   #Se evalua si el perfil existe en el historial de enviados
   if profile in sent_profiles:
@@ -130,7 +173,7 @@ def is_able_to_send(sent_profiles:dict, profile: str) -> bool:
 
 
 #Se define la función que permite agregar y actualizar la información de envio al perfil
-def update_sent_profiles(sent_profiles: dict, profile: str):
+def update_sent_profiles(sent_profiles: dict, profile: str) -> dict:
   
   #Se inicializa el nuevo registro de envios a perfiles
   updated_sent_profiles = sent_profiles
@@ -140,3 +183,17 @@ def update_sent_profiles(sent_profiles: dict, profile: str):
 
   #Se retorna el nuevo registro de envios a perfiles
   return updated_sent_profiles
+
+
+#Se define la función para escribir sobre el archivo de respaldo
+def write_row_in_backup(file: dict, row:list[str]) -> None:
+
+    #Se genera el archivo CSV en la ubicación seleccionada. Para esto, se accede al archivo .env cargado anteriormente y se obtiene la variable "BACKUP_FILES_PATH"
+    with open(os.getenv("BACKUP_FILES_PATH") + "sent_" + file["last_modify_file"] + "_" + file["file_name"], mode="a+", newline='') as csv_file:
+        
+        #Se define un objeto de escritura para el archivo CSV anteriormente creado
+        writer = csv.writer(csv_file, lineterminator = "\n", delimiter = ";")
+
+        #Se escribe la línea en el archivo CSV
+        writer.writerow(row)
+    
